@@ -8,16 +8,16 @@ The functions understood by the program are very similar to math expressions in 
 
 Arithmetic float expressions can be created from float literals, variables or functions using the following operators in this order of precedence:
 
-	()	expressions in parentheses first
-	A^B	exponentiation (A raised to the power B)
-	-A	unary minus
-	!A	unary logical not (result is 1 if int(A) is 0, else 0)
-	A*B A/B A%B	multiplication, division and modulo
-	A+B A-B	addition and subtraction
+	()			expressions in parentheses first
+	A^B			exponentiation (A raised to the power B)
+	-A			unary minus
+	!A			unary logical not (result is 1 if int(A) is 0, else 0)
+	A*B A/B A%B		multiplication, division and modulo
+	A+B A-B			addition and subtraction
 	A=B A!=B A<B
-	A<=B A>B A>=B	comparison between A and B (result is either 0 or 1)
-	A&B	result is 1 if int(A) and int(B) differ from 0, else 0
-	A|B	result is 1 if int(A) or int(B) differ from 0, else 0
+	A<=B A>B A>=B		comparison between A and B (result is either 0 or 1)
+	A&B			result is 1 if int(A) and int(B) differ from 0, else 0
+	A|B			result is 1 if int(A) or int(B) differ from 0, else 0
 
 
 
