@@ -1,2 +1,2 @@
 # fparser
-Function Parser for C++
+Math Function Parser for C++
