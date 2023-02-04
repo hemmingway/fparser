@@ -91,7 +91,7 @@ x-1
 
 -sin(pi*sqrt(x^2))
 
-exp(-x*x)*sin(x*10)
+exp(-x*x) * sin(x*10)
 
 100.0 * cos((2 * pi/180) * x)
 
