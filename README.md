@@ -2,7 +2,7 @@
 Math Function Parser for C++
 
 
-Function syntax
+# Function syntax
 
 The functions understood by the program are very similar to math expressions in the C language.
 
@@ -83,7 +83,7 @@ Additionally, any function name with a number smaller than the current one can b
 
 The constant "pi" is supported.
 
-Examples of function string understood by the program:
+# Examples of function string understood by the program:
 
 1+2
 x-1
