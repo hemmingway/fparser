@@ -83,7 +83,7 @@ Additionally, any function name with a number smaller than the current one can b
 
 The constant "pi" is supported.
 
-# Examples of function string understood by the program:
+# Examples of function string
 
 1+2
 
