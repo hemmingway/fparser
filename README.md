@@ -3,6 +3,7 @@ Math Function Parser for C++
 
 
 Function syntax
+
 The functions understood by the program are very similar to math expressions in the C language.
 
 Arithmetic float expressions can be created from float literals, variables or functions using the following operators in this order of precedence:
