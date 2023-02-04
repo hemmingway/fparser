@@ -25,9 +25,9 @@ Since the unary minus has higher precedence than any other operator, for example
 
 The class supports these functions:
 
-#abs(A) : Absolute value of A. If A is negative, returns -A otherwise returns A.
-#acos(A) : Arc-cosine of A. Returns the angle, measured in radians, whose cosine is A.
-#acosh(A) : Same as acos() but for hyperbolic cosine.
+# abs(A) : Absolute value of A. If A is negative, returns -A otherwise returns A.
+# acos(A) : Arc-cosine of A. Returns the angle, measured in radians, whose cosine is A.
+# acosh(A) : Same as acos() but for hyperbolic cosine.
 asin(A) : Arc-sine of A. Returns the angle, measured in radians, whose sine is A.
 asinh(A) : Same as asin() but for hyperbolic sine.
 atan(A) : Arc-tangent of A. Returns the angle, measured in radians, whose tangent is (A).
