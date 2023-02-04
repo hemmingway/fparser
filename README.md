@@ -86,6 +86,10 @@ The constant "pi" is supported.
 # Examples of function string understood by the program:
 
 1+2
+
 x-1
+
 -sin(pi*sqrt(x^2))
+
 exp(-x*x)*sin(x*10)
+
