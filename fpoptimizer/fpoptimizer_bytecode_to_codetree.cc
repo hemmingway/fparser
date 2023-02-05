@@ -92,9 +92,7 @@ double ParsePowiMuli(
         dup_or_fetch:
             stack.push_back(result);
             ++IP;
-            double subexponent = ParsePowiMuli(opcodes,
-                                               ByteCode, IP, limit,
-                                               factor_stack_base, stack);
+            double subexponent = ParsePowiMuli(opcodes, ByteCode, IP, limit, factor_stack_base, stack);
             if (IP >= limit || ByteCode[IP] != opcodes.opcode_cumulate) {
                 // It wasn't a powi-dup after all
                 IP = dup_fetch_pos;
@@ -110,17 +108,13 @@ double ParsePowiMuli(
     return result;
 }
 
-double ParsePowiSequence(const std::vector<unsigned>& ByteCode, size_t& IP,
-                         size_t limit,
-                         size_t factor_stack_base) {
+double ParsePowiSequence(const std::vector<unsigned>& ByteCode, size_t& IP, size_t limit, size_t factor_stack_base) {
     FactorStack stack;
     stack.push_back(1.0);
     return ParsePowiMuli(iseq_powi, ByteCode, IP, limit, factor_stack_base, stack);
 }
 
-double ParseMuliSequence(const std::vector<unsigned>& ByteCode, size_t& IP,
-                         size_t limit,
-                         size_t factor_stack_base) {
+double ParseMuliSequence(const std::vector<unsigned>& ByteCode, size_t& IP, size_t limit, size_t factor_stack_base) {
     FactorStack stack;
     stack.push_back(1.0);
     return ParsePowiMuli(iseq_muli, ByteCode, IP, limit, factor_stack_base, stack);
@@ -365,7 +359,8 @@ void CodeTree::GenerateFrom(
             sim.Eat(3, cIf);
             if_stack.pop_back();
         }
-        if (IP >= ByteCode.size()) break;
+        if (IP >= ByteCode.size())
+            break;
 
         unsigned opcode = ByteCode[IP];
         if (opcode == cSqr || opcode == cDup || opcode == cInv || opcode == cNeg || opcode == cSqrt || opcode == cRSqrt || opcode == cFetch) {

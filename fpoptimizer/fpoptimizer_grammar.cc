@@ -13,7 +13,7 @@
 #include "fpoptimizer_grammar.hh"
 #include "fpoptimizer_opcodename.hh"
 
-#include <cctype>
+// #include <cctype>
 
 // line removed
 using namespace FPoptimizer_Grammar;
@@ -92,20 +92,25 @@ void DumpParam(const ParamSpec& parampair, std::ostream& o) {
                 DumpParams(param.data.param_list, param.data.param_count, o);
             } else {
                 std::string opcode = FP_GetOpcodeName(param.data.subfunc_opcode).substr(1);
-                for (size_t a = 0; a < opcode.size(); ++a) opcode[a] = (char)std::toupper(opcode[a]);
+                for (size_t a = 0; a < opcode.size(); ++a)
+                    opcode[a] = (char)std::toupper(opcode[a]);
                 o << opcode << "( ";
                 DumpParams(param.data.param_list, param.data.param_count, o);
                 o << " )";
             }
         } else {
             o << '(' << FP_GetOpcodeName(param.data.subfunc_opcode) << ' ';
-            if (param.data.match_type == PositionalParams) o << '[';
-            if (param.data.match_type == SelectedParams) o << '{';
+            if (param.data.match_type == PositionalParams)
+                o << '[';
+            if (param.data.match_type == SelectedParams)
+                o << '{';
             DumpParams(param.data.param_list, param.data.param_count, o);
             if (param.data.restholder_index != 0)
                 o << " <" << param.data.restholder_index << '>';
-            if (param.data.match_type == PositionalParams) o << "]";
-            if (param.data.match_type == SelectedParams) o << "}";
+            if (param.data.match_type == PositionalParams)
+                o << "]";
+            if (param.data.match_type == SelectedParams)
+                o << "}";
             o << ')';
         }
         break;

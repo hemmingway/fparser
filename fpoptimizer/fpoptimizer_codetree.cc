@@ -133,8 +133,7 @@ void CodeTreeData::Recalculate_Hash_NoRecursion() {
     switch (Opcode) {
     case cImmed:
         if (Value != 0.0) {
-            crc32_t crc = crc32::calc((const unsigned char*)&Value,
-                                      sizeof(Value));
+            crc32_t crc = crc32::calc((const unsigned char*)&Value, sizeof(Value));
             NewHash.hash1 ^= crc | (fphash_value_t(crc) << FPHASH_CONST(32));
             NewHash.hash2 += ((~fphash_value_t(crc)) * 3) ^ 1234567;
         }
@@ -276,8 +275,10 @@ void CodeTree::DelParams() {
 
 /* Is the value of this tree definitely odd(true) or even(false)? */
 CodeTree::TriTruthValue CodeTree::GetEvennessInfo() const {
-    if (!IsImmed()) return Unknown;
-    if (!IsLongIntegerImmed()) return Unknown;
+    if (!IsImmed())
+        return Unknown;
+    if (!IsLongIntegerImmed())
+        return Unknown;
     return (GetLongIntegerImmed() & 1) ? IsNever : IsAlways;
 }
 
@@ -353,26 +354,36 @@ bool CodeTree::IsAlwaysSigned(bool positive) const {
 }
 
 bool CodeTree::IsIdenticalTo(const CodeTree& b) const {
-    if ((!&*data) != (!&*b.data)) return false;
-    if (&*data == &*b.data) return true;
+    if ((!&*data) != (!&*b.data))
+        return false;
+    if (&*data == &*b.data)
+        return true;
     return data->IsIdenticalTo(*b.data);
 }
 
 bool CodeTreeData::IsIdenticalTo(const CodeTreeData& b) const {
-    if (Hash != b.Hash) return false; // a quick catch-all
-    if (Opcode != b.Opcode) return false;
+    if (Hash != b.Hash)
+        return false; // a quick catch-all
+    if (Opcode != b.Opcode)
+        return false;
     switch (Opcode) {
-    case cImmed: return FloatEqual(Value, b.Value);
-    case cVar: return Var == b.Var;
+    case cImmed:
+        return FloatEqual(Value, b.Value);
+    case cVar:
+        return Var == b.Var;
     case cFCall:
     case cPCall:
-        if (Funcno != b.Funcno) return false;
+        if (Funcno != b.Funcno)
+            return false;
         break;
-    default: break;
+    default:
+        break;
     }
-    if (Params.size() != b.Params.size()) return false;
+    if (Params.size() != b.Params.size())
+        return false;
     for (size_t a = 0; a < Params.size(); ++a) {
-        if (!Params[a].IsIdenticalTo(b.Params[a])) return false;
+        if (!Params[a].IsIdenticalTo(b.Params[a]))
+            return false;
     }
     return true;
 }
@@ -398,7 +409,11 @@ CodeTree CodeTree::GetUniqueRef() {
 
 CodeTreeData::CodeTreeData()
     : RefCount(0),
-      Opcode(), Params(), Hash(), Depth(1), OptimizedUsing(0) {
+      Opcode(),
+      Params(),
+      Hash(),
+      Depth(1),
+      OptimizedUsing(0) {
 }
 
 CodeTreeData::CodeTreeData(const CodeTreeData& b)
@@ -409,10 +424,16 @@ CodeTreeData::CodeTreeData(const CodeTreeData& b)
       Depth(b.Depth),
       OptimizedUsing(b.OptimizedUsing) {
     switch (Opcode) {
-    case cVar: Var = b.Var; break;
-    case cImmed: Value = b.Value; break;
+    case cVar:
+        Var = b.Var;
+        break;
+    case cImmed:
+        Value = b.Value;
+        break;
     case cPCall:
-    case cFCall: Funcno = b.Funcno; break;
+    case cFCall:
+        Funcno = b.Funcno;
+        break;
     default: break;
     }
 }
@@ -436,7 +457,12 @@ CodeTreeData::CodeTreeData(CodeTreeData&& b)
 #endif
 
 CodeTreeData::CodeTreeData(double i)
-    : RefCount(0), Opcode(cImmed), Params(), Hash(), Depth(1), OptimizedUsing(0) {
+    : RefCount(0),
+      Opcode(cImmed),
+      Params(),
+      Hash(),
+      Depth(1),
+      OptimizedUsing(0) {
     Value = i;
 }
 

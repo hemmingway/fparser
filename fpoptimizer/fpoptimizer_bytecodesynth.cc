@@ -163,13 +163,16 @@ void PlanNtimesCache(long value,
                      PowiCache& cache,
                      int need_count,
                      int recursioncount = 0) {
-    if (value < 1) return;
+    if (value < 1)
+        return;
 
 #ifdef FP_GENERATING_POWI_TABLE
-    if (recursioncount > 32) throw false;
+    if (recursioncount > 32)
+        throw false;
 #endif
 
-    if (cache.Plan_Add(value, need_count)) return;
+    if (cache.Plan_Add(value, need_count))
+        return;
 
     long half = 1;
     if (value < POWI_TABLE_SIZE)
@@ -221,9 +224,7 @@ size_t AssembleSequence_Subdivide(
         size_t half_pos = AssembleSequence_Subdivide(half, cache, sequencing, synth);
 
         // self-cumulate the subdivide result
-        Subdivide_Combine(half_pos, half, half_pos, half, cache,
-                          sequencing.op_normal, sequencing.op_normal_flip,
-                          synth);
+        Subdivide_Combine(half_pos, half, half_pos, half, cache, sequencing.op_normal, sequencing.op_normal_flip, synth);
     } else {
         long part1 = half;
         long part2 = otherhalf > 0 ? otherhalf : -otherhalf;

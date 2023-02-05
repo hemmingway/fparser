@@ -29,8 +29,8 @@ using namespace FPoptimizer_CodeTree;
 #endif
 
 namespace {
-struct ComparisonSet /* For optimizing And, Or */
-{
+/* For optimizing And, Or */
+struct ComparisonSet {
     static const int Lt_Mask = 0x1; // 1=less
     static const int Eq_Mask = 0x2; // 2=equal
     static const int Le_Mask = 0x3; // 1+2 = Less or Equal
@@ -73,9 +73,11 @@ struct ComparisonSet /* For optimizing And, Or */
 
     RelationshipResult AddRelationship(CodeTree a, CodeTree b, int reltype, bool is_or) {
         if (is_or) {
-            if (reltype == 7) return BecomeOne;
+            if (reltype == 7)
+                return BecomeOne;
         } else {
-            if (reltype == 0) return BecomeZero;
+            if (reltype == 0)
+                return BecomeZero;
         }
 
         if (!(a.GetHash() < b.GetHash())) {
@@ -87,11 +89,13 @@ struct ComparisonSet /* For optimizing And, Or */
             if (relationships[c].a.IsIdenticalTo(a) && relationships[c].b.IsIdenticalTo(b)) {
                 if (is_or) {
                     int newrel = relationships[c].relationship | reltype;
-                    if (newrel == 7) return BecomeOne;
+                    if (newrel == 7)
+                        return BecomeOne;
                     relationships[c].relationship = newrel;
                 } else {
                     int newrel = relationships[c].relationship & reltype;
-                    if (newrel == 0) return BecomeZero;
+                    if (newrel == 0)
+                        return BecomeZero;
                     relationships[c].relationship = newrel;
                 }
                 return Suboptimal;
@@ -114,16 +118,21 @@ struct ComparisonSet /* For optimizing And, Or */
     }
 };
 
-struct CollectionSet /* For optimizing Add,  Mul */
-{
+/* For optimizing Add,  Mul */
+struct CollectionSet {
     struct Collection {
         CodeTree value;
         CodeTree factor;
         bool factor_needs_rehashing;
 
-        Collection() : value(), factor(), factor_needs_rehashing(false) {}
+        Collection()
+            : value(),
+              factor(),
+              factor_needs_rehashing(false) {}
         Collection(const CodeTree& v, const CodeTree& f)
-            : value(v), factor(f), factor_needs_rehashing(false) {}
+            : value(v),
+              factor(f),
+              factor_needs_rehashing(false) {}
     };
     std::multimap<fphash_t, Collection> collections;
 
@@ -136,10 +145,7 @@ struct CollectionSet /* For optimizing Add,  Mul */
 
     PositionType FindIdenticalValueTo(const CodeTree& value) {
         fphash_t hash = value.GetHash();
-        for (PositionType
-                 i = collections.lower_bound(hash);
-             i != collections.end() && i->first == hash;
-             ++i) {
+        for (PositionType i = collections.lower_bound(hash); i != collections.end() && i->first == hash; ++i) {
             if (value.IsIdenticalTo(i->second.value))
                 return i;
         }
@@ -188,8 +194,7 @@ struct Select2ndRev {
 };
 struct Select1st {
     template <typename T1, typename T2>
-    inline bool operator()(const std::pair<T1, T2>& a,
-                           const std::pair<T1, T2>& b) const {
+    inline bool operator()(const std::pair<T1, T2>& a, const std::pair<T1, T2>& b) const {
         return a.first < b.first;
     }
 
@@ -264,11 +269,13 @@ struct ConstantExponentCollection {
              */
         for (size_t a = 0; a < data.size(); ++a) {
             double exp_a = data[a].first;
-            if (FloatEqual(exp_a, 1.0)) continue;
+            if (FloatEqual(exp_a, 1.0))
+                continue;
             for (size_t b = a + 1; b < data.size(); ++b) {
                 double exp_b = data[b].first;
                 double exp_diff = exp_b - exp_a;
-                if (exp_diff >= fabs(exp_a)) break;
+                if (exp_diff >= fabs(exp_a))
+                    break;
                 double exp_diff_still_probable_integer = exp_diff * 16.0;
                 if (IsIntegerConst(exp_diff_still_probable_integer) && !(IsIntegerConst(exp_b) && !IsIntegerConst(exp_diff))) {
                     /* When input is x^3 * z^2,
@@ -427,12 +434,24 @@ bool CodeTree::ConstantFolding_LogicCommon(bool is_or) {
             CodeTree r;
             r.SetOpcode(cAtan2);
             switch (comp.relationships[a].relationship) {
-            case ComparisonSet::Lt_Mask: r.SetOpcode(cLess); break;
-            case ComparisonSet::Eq_Mask: r.SetOpcode(cEqual); break;
-            case ComparisonSet::Gt_Mask: r.SetOpcode(cGreater); break;
-            case ComparisonSet::Le_Mask: r.SetOpcode(cLessOrEq); break;
-            case ComparisonSet::Ne_Mask: r.SetOpcode(cNEqual); break;
-            case ComparisonSet::Ge_Mask: r.SetOpcode(cGreaterOrEq); break;
+            case ComparisonSet::Lt_Mask:
+                r.SetOpcode(cLess);
+                break;
+            case ComparisonSet::Eq_Mask:
+                r.SetOpcode(cEqual);
+                break;
+            case ComparisonSet::Gt_Mask:
+                r.SetOpcode(cGreater);
+                break;
+            case ComparisonSet::Le_Mask:
+                r.SetOpcode(cLessOrEq);
+                break;
+            case ComparisonSet::Ne_Mask:
+                r.SetOpcode(cNEqual);
+                break;
+            case ComparisonSet::Ge_Mask:
+                r.SetOpcode(cGreaterOrEq);
+                break;
             }
             r.AddParamMove(comp.relationships[a].a);
             r.AddParamMove(comp.relationships[a].b);
@@ -566,10 +585,7 @@ bool CodeTree::ConstantFolding_MulGrouping() {
         exponent_map;
     exponent_map by_exponent;
 
-    for (CollectionSet::PositionType
-             j = mul.collections.begin();
-         j != mul.collections.end();
-         ++j) {
+    for (CollectionSet::PositionType j = mul.collections.begin(); j != mul.collections.end(); ++j) {
         CodeTree& value = j->second.value;
         CodeTree& exponent = j->second.factor;
         if (j->second.factor_needs_rehashing) exponent.Rehash();
@@ -591,11 +607,7 @@ bool CodeTree::ConstantFolding_MulGrouping() {
 
 #ifdef FP_MUL_COMBINE_EXPONENTS
     ConstantExponentCollection by_float_exponent;
-    for (exponent_map::iterator
-             j,
-         i = by_exponent.begin();
-         i != by_exponent.end();
-         i = j) {
+    for (exponent_map::iterator j, i = by_exponent.begin(); i != by_exponent.end(); i = j) {
         j = i;
         ++j;
         exponent_list& list = i->second;
@@ -712,7 +724,8 @@ bool CodeTree::ConstantFolding_AddGrouping() {
     bool should_regenerate = false;
     CollectionSet add;
     for (size_t a = 0; a < GetParamCount(); ++a) {
-        if (GetParam(a).GetOpcode() == cMul) continue;
+        if (GetParam(a).GetOpcode() == cMul)
+            continue;
         if (add.AddCollection(GetParam(a)) == CollectionSet::Suboptimal)
             should_regenerate = true;
         // This catches x + x and x - x
@@ -730,7 +743,8 @@ bool CodeTree::ConstantFolding_AddGrouping() {
             // better expressed as 70*x + 60, and converting
             // back to that format would be needlessly hairy.
             for (size_t b = 0; b < mulgroup.GetParamCount(); ++b) {
-                if (mulgroup.GetParam(b).IsImmed()) continue;
+                if (mulgroup.GetParam(b).IsImmed())
+                    continue;
                 CollectionSet::PositionType c = add.FindIdenticalValueTo(mulgroup.GetParam(b));
                 if (add.Found(c)) {
                     CodeTree tmp(mulgroup, CodeTree::CloneTag());
@@ -759,10 +773,7 @@ bool CodeTree::ConstantFolding_AddGrouping() {
                     for (size_t b = 0; b < GetParam(a).GetParamCount(); ++b) {
                         const CodeTree& p = GetParam(a).GetParam(b);
                         const fphash_t p_hash = p.GetHash();
-                        for (std::multimap<fphash_t, size_t>::const_iterator
-                                 i = occurance_pos.lower_bound(p_hash);
-                             i != occurance_pos.end() && i->first == p_hash;
-                             ++i) {
+                        for (std::multimap<fphash_t, size_t>::const_iterator i = occurance_pos.lower_bound(p_hash); i != occurance_pos.end() && i->first == p_hash; ++i) {
                             if (occurance_counts[i->second].first.IsIdenticalTo(p)) {
                                 occurance_counts[i->second].second += 1;
                                 found_dup = true;
@@ -839,13 +850,11 @@ bool CodeTree::ConstantFolding_AddGrouping() {
 #endif
         DelParams();
 
-        for (CollectionSet::PositionType
-                 j = add.collections.begin();
-             j != add.collections.end();
-             ++j) {
+        for (CollectionSet::PositionType j = add.collections.begin(); j != add.collections.end(); ++j) {
             CodeTree& value = j->second.value;
             CodeTree& coeff = j->second.factor;
-            if (j->second.factor_needs_rehashing) coeff.Rehash();
+            if (j->second.factor_needs_rehashing)
+                coeff.Rehash();
 
             if (coeff.IsImmed()) {
                 if (coeff.GetImmed() == 0.0)
@@ -980,10 +989,14 @@ redo:;
         }
         if (all_values_are_nonzero) goto ReplaceTreeWithOne;
         switch (GetParamCount()) {
-        case 0: goto ReplaceTreeWithZero;
-        case 1: SetOpcode(cNotNot); goto redo; // Replace self with the single operand
+        case 0:
+            goto ReplaceTreeWithZero;
+        case 1:
+            SetOpcode(cNotNot);
+            goto redo; // Replace self with the single operand
         default:
-            if (ConstantFolding_AndLogic()) goto redo;
+            if (ConstantFolding_AndLogic())
+                goto redo;
         }
         break;
     }
@@ -1006,24 +1019,41 @@ redo:;
             } else
                 all_values_are_zero = false;
         }
-        if (all_values_are_zero) goto ReplaceTreeWithZero;
+        if (all_values_are_zero)
+            goto ReplaceTreeWithZero;
         switch (GetParamCount()) {
-        case 0: goto ReplaceTreeWithOne;
-        case 1: SetOpcode(cNotNot); goto redo; // Replace self with the single operand
+        case 0:
+            goto ReplaceTreeWithOne;
+        case 1:
+            SetOpcode(cNotNot);
+            goto redo; // Replace self with the single operand
         default:
-            if (ConstantFolding_OrLogic()) goto redo;
+            if (ConstantFolding_OrLogic())
+                goto redo;
         }
         break;
     }
     case cNot: {
         GetParam(0).ConstantFolding_FromLogicalParent();
         switch (GetParam(0).GetOpcode()) {
-        case cEqual: SetOpcode(cNEqual); goto cNot_moveparam;
-        case cNEqual: SetOpcode(cEqual); goto cNot_moveparam;
-        case cLess: SetOpcode(cGreaterOrEq); goto cNot_moveparam;
-        case cGreater: SetOpcode(cLessOrEq); goto cNot_moveparam;
-        case cLessOrEq: SetOpcode(cGreater); goto cNot_moveparam;
-        case cGreaterOrEq: SetOpcode(cLess); goto cNot_moveparam;
+        case cEqual:
+            SetOpcode(cNEqual);
+            goto cNot_moveparam;
+        case cNEqual:
+            SetOpcode(cEqual);
+            goto cNot_moveparam;
+        case cLess:
+            SetOpcode(cGreaterOrEq);
+            goto cNot_moveparam;
+        case cGreater:
+            SetOpcode(cLessOrEq);
+            goto cNot_moveparam;
+        case cLessOrEq:
+            SetOpcode(cGreater);
+            goto cNot_moveparam;
+        case cGreaterOrEq:
+            SetOpcode(cLess);
+            goto cNot_moveparam;
         //cNotNot already handled by ConstantFolding_FromLogicalParent()
         case cNot:
             SetOpcode(cNotNot);
@@ -1033,7 +1063,8 @@ redo:;
                 SetParamsMove(GetParam(0).GetUniqueRef().GetParams());
                 goto redo;
             }
-        default: break;
+        default:
+            break;
         }
 
         // If the sub-expression evaluates to approx. zero, yield one.
@@ -1065,8 +1096,7 @@ redo:;
     }
     case cIf: {
         GetParam(0).ConstantFolding_FromLogicalParent();
-        // If the If() condition begins with a cNot,
-        // remove the cNot and swap the branches.
+        // If the If() condition begins with a cNot, remove the cNot and swap the branches.
         while (GetParam(0).GetOpcode() == cNot) {
             GetParam(0).Become(GetParam(0).GetParam(0));
             GetParam(1).swap(GetParam(2));
@@ -1094,10 +1124,12 @@ redo:;
         size_t n_immeds = 0;
         bool needs_resynth = false;
         for (size_t a = 0; a < GetParamCount(); ++a) {
-            if (!GetParam(a).IsImmed()) continue;
+            if (!GetParam(a).IsImmed())
+                continue;
             // ^ Only check constant values
             double immed = GetParam(a).GetImmed();
-            if (immed == 0.0) goto ReplaceTreeWithZero;
+            if (immed == 0.0)
+                goto ReplaceTreeWithZero;
             immed_product *= immed;
             ++n_immeds;
         }
@@ -1121,10 +1153,13 @@ redo:;
                 AddParam(CodeTree(immed_product));
         }
         switch (GetParamCount()) {
-        case 0: goto ReplaceTreeWithOne;
-        case 1: goto ReplaceTreeWithParam0; // Replace self with the single operand
+        case 0:
+            goto ReplaceTreeWithOne;
+        case 1:
+            goto ReplaceTreeWithParam0; // Replace self with the single operand
         default:
-            if (ConstantFolding_MulGrouping()) goto redo;
+            if (ConstantFolding_MulGrouping())
+                goto redo;
         }
         break;
     }
@@ -1134,7 +1169,8 @@ redo:;
         size_t n_immeds = 0;
         bool needs_resynth = false;
         for (size_t a = 0; a < GetParamCount(); ++a) {
-            if (!GetParam(a).IsImmed()) continue;
+            if (!GetParam(a).IsImmed())
+                continue;
             // ^ Only check constant values
             double immed = GetParam(a).GetImmed();
             immed_sum += immed;
@@ -1163,10 +1199,13 @@ redo:;
                 AddParam(CodeTree(immed_sum));
         }
         switch (GetParamCount()) {
-        case 0: goto ReplaceTreeWithZero;
-        case 1: goto ReplaceTreeWithParam0; // Replace self with the single operand
+        case 0:
+            goto ReplaceTreeWithZero;
+        case 1:
+            goto ReplaceTreeWithParam0; // Replace self with the single operand
         default:
-            if (ConstantFolding_AddGrouping()) goto redo;
+            if (ConstantFolding_AddGrouping())
+                goto redo;
         }
         break;
     }
@@ -1242,7 +1281,8 @@ redo:;
     }
 
     case cEqual: {
-        if (GetParam(0).IsIdenticalTo(GetParam(1))) goto ReplaceTreeWithOne;
+        if (GetParam(0).IsIdenticalTo(GetParam(1)))
+            goto ReplaceTreeWithOne;
         /* If we know the two operands' ranges don't overlap, we get zero.
                  * The opposite is more complex and is done in .dat code.
                  */
@@ -1266,7 +1306,8 @@ redo:;
     }
 
     case cLess: {
-        if (GetParam(0).IsIdenticalTo(GetParam(1))) goto ReplaceTreeWithZero;
+        if (GetParam(0).IsIdenticalTo(GetParam(1)))
+            goto ReplaceTreeWithZero;
         MinMaxTree p0 = GetParam(0).CalculateResultBoundaries();
         MinMaxTree p1 = GetParam(1).CalculateResultBoundaries();
         if (p0._has_max && p1._has_min && p0._max < p1._min)
@@ -1277,7 +1318,8 @@ redo:;
     }
 
     case cLessOrEq: {
-        if (GetParam(0).IsIdenticalTo(GetParam(1))) goto ReplaceTreeWithOne;
+        if (GetParam(0).IsIdenticalTo(GetParam(1)))
+            goto ReplaceTreeWithOne;
         MinMaxTree p0 = GetParam(0).CalculateResultBoundaries();
         MinMaxTree p1 = GetParam(1).CalculateResultBoundaries();
         if (p0._has_max && p1._has_min && p0._max <= p1._min)
@@ -1288,7 +1330,8 @@ redo:;
     }
 
     case cGreater: {
-        if (GetParam(0).IsIdenticalTo(GetParam(1))) goto ReplaceTreeWithZero;
+        if (GetParam(0).IsIdenticalTo(GetParam(1)))
+            goto ReplaceTreeWithZero;
         // Note: Eq case not handled
         MinMaxTree p0 = GetParam(0).CalculateResultBoundaries();
         MinMaxTree p1 = GetParam(1).CalculateResultBoundaries();
@@ -1300,7 +1343,8 @@ redo:;
     }
 
     case cGreaterOrEq: {
-        if (GetParam(0).IsIdenticalTo(GetParam(1))) goto ReplaceTreeWithOne;
+        if (GetParam(0).IsIdenticalTo(GetParam(1)))
+            goto ReplaceTreeWithOne;
         // Note: Eq case not handled
         MinMaxTree p0 = GetParam(0).CalculateResultBoundaries();
         MinMaxTree p1 = GetParam(1).CalculateResultBoundaries();
@@ -1337,8 +1381,12 @@ redo:;
             std::vector<CodeTree> neg_set;
             for (size_t a = 0; a < p.GetParamCount(); ++a) {
                 p0 = p.GetParam(a).CalculateResultBoundaries();
-                if (p0._has_min && p0._min >= 0.0) { pos_set.push_back(p.GetParam(a)); }
-                if (p0._has_max && p0._max <= NEGATIVE_MAXIMUM) { neg_set.push_back(p.GetParam(a)); }
+                if (p0._has_min && p0._min >= 0.0) {
+                    pos_set.push_back(p.GetParam(a));
+                }
+                if (p0._has_max && p0._max <= NEGATIVE_MAXIMUM) {
+                    neg_set.push_back(p.GetParam(a));
+                }
             }
 #ifdef DEBUG_SUBSTITUTIONS
             std::cout << "Abs: mul group has " << pos_set.size()
@@ -1405,23 +1453,57 @@ redo:;
         goto ReplaceTreeWithConstValue;                 \
     }
 
-    case cLog: HANDLE_UNARY_CONST_FUNC(log); break;
-    case cAcosh: HANDLE_UNARY_CONST_FUNC(fp_acosh); break;
-    case cAsinh: HANDLE_UNARY_CONST_FUNC(fp_asinh); break;
-    case cAtanh: HANDLE_UNARY_CONST_FUNC(fp_atanh); break;
-    case cAcos: HANDLE_UNARY_CONST_FUNC(acos); break;
-    case cAsin: HANDLE_UNARY_CONST_FUNC(asin); break;
-    case cAtan: HANDLE_UNARY_CONST_FUNC(atan); break;
-    case cCosh: HANDLE_UNARY_CONST_FUNC(cosh); break;
-    case cSinh: HANDLE_UNARY_CONST_FUNC(sinh); break;
-    case cTanh: HANDLE_UNARY_CONST_FUNC(tanh); break;
-    case cSin: HANDLE_UNARY_CONST_FUNC(sin); break;
-    case cCos: HANDLE_UNARY_CONST_FUNC(cos); break;
-    case cTan: HANDLE_UNARY_CONST_FUNC(tan); break;
-    case cCeil: HANDLE_UNARY_CONST_FUNC(ceil); break;
-    case cFloor: HANDLE_UNARY_CONST_FUNC(floor); break;
-    case cSqrt: HANDLE_UNARY_CONST_FUNC(sqrt); break; // converted into cPow x 0.5
-    case cExp: HANDLE_UNARY_CONST_FUNC(exp); break; // convered into cPow CONSTANT_E x
+    case cLog:
+        HANDLE_UNARY_CONST_FUNC(log);
+        break;
+    case cAcosh:
+        HANDLE_UNARY_CONST_FUNC(fp_acosh);
+        break;
+    case cAsinh:
+        HANDLE_UNARY_CONST_FUNC(fp_asinh);
+        break;
+    case cAtanh:
+        HANDLE_UNARY_CONST_FUNC(fp_atanh);
+        break;
+    case cAcos:
+        HANDLE_UNARY_CONST_FUNC(acos);
+        break;
+    case cAsin:
+        HANDLE_UNARY_CONST_FUNC(asin);
+        break;
+    case cAtan:
+        HANDLE_UNARY_CONST_FUNC(atan);
+        break;
+    case cCosh:
+        HANDLE_UNARY_CONST_FUNC(cosh);
+        break;
+    case cSinh:
+        HANDLE_UNARY_CONST_FUNC(sinh);
+        break;
+    case cTanh:
+        HANDLE_UNARY_CONST_FUNC(tanh);
+        break;
+    case cSin:
+        HANDLE_UNARY_CONST_FUNC(sin);
+        break;
+    case cCos:
+        HANDLE_UNARY_CONST_FUNC(cos);
+        break;
+    case cTan:
+        HANDLE_UNARY_CONST_FUNC(tan);
+        break;
+    case cCeil:
+        HANDLE_UNARY_CONST_FUNC(ceil);
+        break;
+    case cFloor:
+        HANDLE_UNARY_CONST_FUNC(floor);
+        break;
+    case cSqrt:
+        HANDLE_UNARY_CONST_FUNC(sqrt);
+        break; // converted into cPow x 0.5
+    case cExp:
+        HANDLE_UNARY_CONST_FUNC(exp);
+        break; // convered into cPow CONSTANT_E x
     case cInt:
         if (GetParam(0).IsImmed()) {
             const_value = floor(GetParam(0).GetImmed() + 0.5);
@@ -1482,8 +1564,7 @@ redo:;
                                 GetParam(1).GetImmed());
             goto ReplaceTreeWithConstValue;
         }
-        if ((p1._has_min && p1._min > 0.0) || (p1._has_max && p1._max < NEGATIVE_MAXIMUM)) // become atan(p0 / p1)
-        {
+        if ((p1._has_min && p1._min > 0.0) || (p1._has_max && p1._max < NEGATIVE_MAXIMUM)) { // become atan(p0 / p1)
             CodeTree pow_tree;
             pow_tree.SetOpcode(cPow);
             pow_tree.AddParam(GetParam(1));
@@ -1679,8 +1760,7 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         /* cAbs always produces a positive value */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min && m._has_max) {
-            if (m._min < 0.0 && m._max >= 0.0) // ex. -10..+6 or -6..+10
-            {
+            if (m._min < 0.0 && m._max >= 0.0) { // ex. -10..+6 or -6..+10
                 /* -x..+y: spans across zero. min=0, max=greater of |x| and |y|. */
                 double tmp = -m._min;
                 if (tmp > m._max) m._max = tmp;
@@ -1712,8 +1792,7 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         return m;
     }
 
-    case cLog: /* Defined for 0.0 < x <= inf */
-    {
+    case cLog: { /* Defined for 0.0 < x <= inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min) {
             if (m._min < 0.0)
@@ -1730,8 +1809,7 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         return m;
     }
 
-    case cLog2: /* Defined for 0.0 < x <= inf */
-    {
+    case cLog2: { /* Defined for 0.0 < x <= inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min) {
             if (m._min < 0.0)
@@ -1779,20 +1857,17 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         if (m._has_max) m._max = fp_atanh(m._max);
         return m;
     }
-    case cAcos: /* defined for -1.0 <= x < 1, results within CONSTANT_PI..0 */
-    {
+    case cAcos: { /* defined for -1.0 <= x < 1, results within CONSTANT_PI..0 */
         /* Somewhat complicated to narrow down from this */
         /* TODO: A resourceful programmer may add it later. */
         return MinMaxTree(0.0, CONSTANT_PI);
     }
-    case cAsin: /* defined for -1.0 <= x < 1, results within -CONSTANT_PIHALF..CONSTANT_PIHALF */
-    {
+    case cAsin: { /* defined for -1.0 <= x < 1, results within -CONSTANT_PIHALF..CONSTANT_PIHALF */
         /* Somewhat complicated to narrow down from this */
         /* TODO: A resourceful programmer may add it later. */
         return MinMaxTree(-CONSTANT_PIHALF, CONSTANT_PIHALF);
     }
-    case cAtan: /* defined for all values -inf <= x <= inf */
-    {
+    case cAtan: { /* defined for all values -inf <= x <= inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min)
             m._min = atan(m._min);
@@ -1808,8 +1883,7 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         }
         return m;
     }
-    case cAtan2: /* too complicated to estimate */
-    {
+    case cAtan2: { /* too complicated to estimate */
         /* Somewhat complicated to narrow down from this */
         /* TODO: A resourceful programmer may add it later. */
         return MinMaxTree(-CONSTANT_PI, CONSTANT_PI);
@@ -1847,46 +1921,38 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
         m._max = std::ceil(m._max); // for safety, we assume both
         return m;
     }
-    case cSinh: /* defined for all values -inf <= x <= inf */
-    {
+    case cSinh: { /* defined for all values -inf <= x <= inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min) m._min = sinh(m._min); // No boundaries
         if (m._has_max) m._max = sinh(m._max);
         return m;
     }
-    case cTanh: /* defined for all values -inf <= x <= inf */
-    {
+    case cTanh: { /* defined for all values -inf <= x <= inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min) m._min = tanh(m._min); // No boundaries
         if (m._has_max) m._max = tanh(m._max);
         return m;
     }
-    case cCosh: /* defined for all values -inf <= x <= inf, results within 1..inf */
-    {
+    case cCosh: { /* defined for all values -inf <= x <= inf, results within 1..inf */
         MinMaxTree m = GetParam(0).CalculateResultBoundaries();
         if (m._has_min) {
-            if (m._has_max) // max, min
-            {
-                if (m._min >= 0.0 && m._max >= 0.0) // +x .. +y
-                {
+            if (m._has_max) { // max, min
+                if (m._min >= 0.0 && m._max >= 0.0) { // +x .. +y
                     m._min = cosh(m._min);
                     m._max = cosh(m._max);
-                } else if (m._min < 0.0 && m._max >= 0.0) // -x .. +y
-                {
+                } else if (m._min < 0.0 && m._max >= 0.0) { // -x .. +y
                     double tmp = cosh(m._min);
                     m._max = cosh(m._max);
-                    if (tmp > m._max) m._max = tmp;
+                    if (tmp > m._max)
+                        m._max = tmp;
                     m._min = 1.0;
-                } else // -x .. -y
-                {
+                } else { // -x .. -y
                     m._min = cosh(m._min);
                     m._max = cosh(m._max);
                     std::swap(m._min, m._max);
                 }
-            } else // min, no max
-            {
-                if (m._min >= 0.0) // 0..inf -> 1..inf
-                {
+            } else { // min, no max
+                if (m._min >= 0.0) { // 0..inf -> 1..inf
                     m._has_max = true;
                     m._max = cosh(m._min);
                     m._min = 1.0;
@@ -1895,16 +1961,15 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
                     m._min = 1.0;
                 } // Anything between 1..inf
             }
-        } else // no min
-        {
+        } else { // no min
             m._has_min = true;
             m._min = 1.0; // always a lower boundary
-            if (m._has_max) // max, no min
-            {
+            if (m._has_max) { // max, no min
                 m._min = cosh(m._max); // n..inf
                 m._has_max = false; // No upper boundary
-            } else // no max, no min
+            } else { // no max, no min
                 m._has_max = false; // No upper boundary
+            }
         }
         return m;
     }
@@ -2068,7 +2133,8 @@ MinMaxTree CodeTree::CalculateResultBoundaries_do() const
             else
                 result._has_max = false;
 
-            if (!result._has_min && !result._has_max) break; // hopeless
+            if (!result._has_min && !result._has_max)
+                break; // hopeless
         }
         if (result._has_min && result._has_max && result._min > result._max) std::swap(result._min, result._max);
         return result;

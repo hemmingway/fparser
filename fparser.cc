@@ -13,9 +13,10 @@ using namespace FUNCTIONPARSERTYPES;
 #include <set>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include <cmath>
 #include <cassert>
+// #include <cctype>
+#include "ascii.hh"
 // using namespace std;
 
 #ifdef FP_USE_THREAD_SAFE_EVAL_WITH_ALLOCA
@@ -1072,7 +1073,7 @@ const char* FunctionParser::CompileIf(const char* function) {
     data->ByteCode[curByteCodeSize2 + 1] = unsigned(data->Immed.size());
 
     ++function;
-    while (isspace(*function))
+    while (Ascii::isSpace(*function))
         ++function;
     return function;
 }
@@ -1099,14 +1100,14 @@ const char* FunctionParser::CompileFunctionParams(const char* function, unsigned
     } else {
         incStackPtr(); // return value of function is pushed onto the stack
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
     }
 
     if (*function != ')')
         return SetErrorType(noParenthError(*function), function);
     ++function;
-    while (isspace(*function))
+    while (Ascii::isSpace(*function))
         ++function;
     return function;
 }
@@ -1116,7 +1117,7 @@ const char* FunctionParser::CompileElement(const char* function) {
 
     if (c == '(') { // Expression in parentheses
         ++function;
-        while (isspace(*function)) ++function;
+        while (Ascii::isSpace(*function)) ++function;
         if (*function == ')')
             return SetErrorType(EMPTY_PARENTH, function);
 
@@ -1128,12 +1129,12 @@ const char* FunctionParser::CompileElement(const char* function) {
             return SetErrorType(MISSING_PARENTH, function);
 
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
         return function;
     }
 
-    if (isdigit(c) || c == '.') { // Number
+    if (Ascii::isDigit(c) || c == '.') { // Number
         char* endPtr;
         const double val = strtod(function, &endPtr);
         if (endPtr == function)
@@ -1143,7 +1144,7 @@ const char* FunctionParser::CompileElement(const char* function) {
         data->ByteCode.push_back(cImmed);
         incStackPtr();
 
-        while (isspace(*endPtr))
+        while (Ascii::isSpace(*endPtr))
             ++endPtr;
         return endPtr;
     }
@@ -1151,7 +1152,7 @@ const char* FunctionParser::CompileElement(const char* function) {
     const char* endPtr = readIdentifier(function);
     if (endPtr != function) { // Function, variable or constant
         NamePtr name(function, unsigned(endPtr - function));
-        while (isspace(*endPtr))
+        while (Ascii::isSpace(*endPtr))
             ++endPtr;
 
         const FuncDefinition* funcDef = findFunction(name);
@@ -1220,7 +1221,7 @@ const char* FunctionParser::CompilePossibleUnit(const char* function) {
 
     if (endPtr != function) {
         NamePtr name(function, unsigned(endPtr - function));
-        while (isspace(*endPtr))
+        while (Ascii::isSpace(*endPtr))
             ++endPtr;
 
         std::map<NamePtr, const NameData*>::iterator nameIter = data->namePtrs.find(name);
@@ -1244,7 +1245,7 @@ const char* FunctionParser::CompilePow(const char* function) {
 
     if (*function == '^') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
 
         bool base_is_immed = false;
@@ -1294,7 +1295,7 @@ const char* FunctionParser::CompileUnaryMinus(const char* function) {
     const char op = *function;
     if (op == '-' || op == '!') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
         function = CompileUnaryMinus(function);
         if (!function)
@@ -1338,7 +1339,7 @@ inline const char* FunctionParser::CompileMult(const char* function) {
     char op;
     while ((op = *function) == '*' || op == '/' || op == '%') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
 
         bool is_unary = false;
@@ -1446,7 +1447,7 @@ inline const char* FunctionParser::CompileAddition(const char* function) {
     char op;
     while ((op = *function) == '+' || op == '-') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
 
         bool is_unary = false;
@@ -1552,7 +1553,7 @@ const char* FunctionParser::CompileComparison(const char* function) {
 
     int opCode;
     while ((opCode = getComparisonOpcode(function)) >= 0) {
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
         function = CompileAddition(function);
         if (!function)
@@ -1570,7 +1571,7 @@ inline const char* FunctionParser::CompileAnd(const char* function) {
 
     while (*function == '&') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
         function = CompileComparison(function);
         if (!function)
@@ -1582,7 +1583,7 @@ inline const char* FunctionParser::CompileAnd(const char* function) {
 }
 
 const char* FunctionParser::CompileExpression(const char* function) {
-    while (isspace(*function))
+    while (Ascii::isSpace(*function))
         ++function;
     function = CompileAnd(function);
     if (!function)
@@ -1590,7 +1591,7 @@ const char* FunctionParser::CompileExpression(const char* function) {
 
     while (*function == '|') {
         ++function;
-        while (isspace(*function))
+        while (Ascii::isSpace(*function))
             ++function;
         function = CompileAnd(function);
         if (!function)
